@@ -24,10 +24,11 @@ async def fetch_quick_prices(exchanges):
                 async with session.get(url) as resp:
                     data = await resp.json()
                     for item in data:
-                        bid = float(item['bidPrice'])
-                        ask = float(item['askPrice'])
                         sym = normalize_symbol('BINANCE', item['symbol'])
-                        results['BINANCE'][sym] = {'bid': bid, 'ask': ask}
+                        results['BINANCE'][sym] = {
+                            'bid': float(item['bidPrice']),
+                            'ask': float(item['askPrice']),
+                        }
                 log(f"[Info] Binance quick prices loaded: {len(results['BINANCE'])} items")
             except Exception as e:
                 log(f"[Error] Binance quick prices: {e}")
@@ -39,10 +40,11 @@ async def fetch_quick_prices(exchanges):
                     data = await resp.json()
                     count = 0
                     for t in data['data']['ticker']:
+                        sym = normalize_symbol('KUCOIN', t['symbol'])
                         bid = float(t.get('buy') or 0)
                         ask = float(t.get('sell') or 0)
-                        sym = normalize_symbol('KUCOIN', t['symbol'])
-                        results['KUCOIN'][sym] = {'bid': bid, 'ask': ask}
+                        if bid > 0 and ask > 0:
+                            results['KUCOIN'][sym] = {'bid': bid, 'ask': ask}
                         count += 1
                 log(f"[Info] KuCoin quick prices loaded: {count} items")
             except Exception as e:
@@ -54,10 +56,11 @@ async def fetch_quick_prices(exchanges):
                 async with session.get(url) as resp:
                     data = await resp.json()
                     for item in data:
-                        bid = float(item['bidPrice'])
-                        ask = float(item['askPrice'])
                         sym = normalize_symbol('MEXC', item['symbol'])
-                        results['MEXC'][sym] = {'bid': bid, 'ask': ask}
+                        results['MEXC'][sym] = {
+                            'bid': float(item['bidPrice']),
+                            'ask': float(item['askPrice']),
+                        }
                 log(f"[Info] MEXC quick prices loaded: {len(results['MEXC'])} items")
             except Exception as e:
                 log(f"[Error] MEXC quick prices: {e}")
@@ -66,11 +69,6 @@ async def fetch_quick_prices(exchanges):
 
 
 async def fetch_last_prices(exchanges):
-    """
-    Функція для отримання last price (останньої ціни) по біржах.
-    Використовує аналогічний API як і в fetch_quick_prices, але бере last price (price),
-    а не bid/ask.
-    """
     results = {ex: {} for ex in exchanges}
 
     async with aiohttp.ClientSession() as session:
@@ -78,6 +76,8 @@ async def fetch_last_prices(exchanges):
             try:
                 url = 'https://api.binance.com/api/v3/ticker/price'
                 async with session.get(url) as resp:
+                    text = await resp.text()
+                    log(f"[Debug] Binance last prices raw response: {text[:500]}")
                     data = await resp.json()
                     for item in data:
                         sym = normalize_symbol('BINANCE', item['symbol'])
@@ -91,6 +91,8 @@ async def fetch_last_prices(exchanges):
             try:
                 url = 'https://api.kucoin.com/api/v1/market/allTickers'
                 async with session.get(url) as resp:
+                    text = await resp.text()
+                    log(f"[Debug] KuCoin last prices raw response: {text[:500]}")
                     data = await resp.json()
                     count = 0
                     for t in data['data']['ticker']:
@@ -107,6 +109,8 @@ async def fetch_last_prices(exchanges):
             try:
                 url = 'https://api.mexc.com/api/v3/ticker/price'
                 async with session.get(url) as resp:
+                    text = await resp.text()
+                    log(f"[Debug] MEXC last prices raw response: {text[:500]}")
                     data = await resp.json()
                     for item in data:
                         sym = normalize_symbol('MEXC', item['symbol'])
@@ -117,6 +121,9 @@ async def fetch_last_prices(exchanges):
                 log(f"[Error] MEXC last prices: {e}")
 
     return results
+
+
+
 
 
 def find_candidates_by_last_price(last_prices, spot_pairs, futures_pairs, exchanges, min_spread_percent, max_spread_percent):

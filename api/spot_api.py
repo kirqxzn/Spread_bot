@@ -21,25 +21,35 @@ class SpotAPI:
                 self.spot_pairs[ex] = set(filtered)
                 log(f"[Info] {ex}: Loaded {len(filtered)} pairs after stablecoin filter")
 
+    @staticmethod
+    def normalize_symbol(exchange, symbol):
+        if exchange == 'KUCOIN':
+            return symbol.replace('-', '').upper()
+        elif exchange == 'MEXC':
+            return symbol.replace('_', '').upper()
+        else:  # BINANCE та інші
+            return symbol.upper()
+
     async def fetch_spot_pairs(self, exchange):
         try:
             if exchange == 'BINANCE':
                 url = 'https://api.binance.com/api/v3/exchangeInfo'
                 async with self.session.get(url) as resp:
                     data = await resp.json()
-                    return [s['symbol'] for s in data['symbols'] if s['status'] == 'TRADING']
+                    return [self.normalize_symbol(exchange, s['symbol']) for s in data['symbols'] if
+                            s['status'] == 'TRADING']
 
             elif exchange == 'KUCOIN':
                 url = 'https://api.kucoin.com/api/v1/symbols'
                 async with self.session.get(url) as resp:
                     data = await resp.json()
-                    return [s['symbol'].replace('-', '') for s in data['data'] if s['enableTrading']]
+                    return [self.normalize_symbol(exchange, s['symbol']) for s in data['data'] if s['enableTrading']]
 
             elif exchange == 'MEXC':
                 url = 'https://api.mexc.com/api/v3/exchangeInfo'
                 async with self.session.get(url) as resp:
                     data = await resp.json()
-                    return [s['symbol'] for s in data['symbols']]
+                    return [self.normalize_symbol(exchange, s['symbol']) for s in data['symbols']]
 
         except Exception as e:
             log(f"[Error] Fetching pairs from {exchange}: {e}")
@@ -105,6 +115,7 @@ class SpotAPI:
         Повертає dict: {exchange: {pair: float_last_price}}
         """
         last_prices = {ex: {} for ex in self.spot_pairs.keys()}
+
 
         async with aiohttp.ClientSession() as session:
             self.session = session

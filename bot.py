@@ -25,6 +25,15 @@ class ArbitrageBot:
         self.spot_pairs = {ex: set() for ex in self.exchanges}
         self.futures_pairs = {ex: set() for ex in self.exchanges}
 
+        # Закоментовано, бо тут поки пусто
+        # for ex, pairs in self.spot_pairs.items():
+        #     log(f"[Debug] {ex} spot pairs count: {len(pairs)}")
+        #     log(f"[Debug] {ex} spot pairs sample: {list(pairs)[:5]}")
+
+        # for ex, pairs in self.futures_pairs.items():
+        #     log(f"[Debug] {ex} futures pairs count: {len(pairs)}")
+        #     log(f"[Debug] {ex} futures pairs sample: {list(pairs)[:5]}")
+
     async def start(self):
         timeout = aiohttp.ClientTimeout(total=60)
         async with aiohttp.ClientSession(timeout=timeout) as session:
@@ -36,13 +45,27 @@ class ArbitrageBot:
             self.spot_pairs = self.spot_api.spot_pairs
             log(f"[Info] Spot pairs loaded")
 
+            # Логування після завантаження spot_pairs
+            for ex, pairs in self.spot_pairs.items():
+                log(f"[Debug] {ex} spot pairs count: {len(pairs)}")
+                log(f"[Debug] {ex} spot pairs sample: {list(pairs)[:5]}")
+
             await self.futures_api.load_futures_pairs()
             self.futures_pairs = self.futures_api.futures_pairs
             log(f"[Info] Futures pairs loaded")
 
+            # Логування після завантаження futures_pairs
+            for ex, pairs in self.futures_pairs.items():
+                log(f"[Debug] {ex} futures pairs count: {len(pairs)}")
+                log(f"[Debug] {ex} futures pairs sample: {list(pairs)[:5]}")
+
             # Fetch last prices & find candidates by last price
             last_prices = await fetch_last_prices(self.exchanges)
             log(f"[Info] Last prices fetched")
+            for ex, prices in last_prices.items():
+                log(f"[Debug] {ex} last_prices count: {len(prices)}")
+                sample = list(prices.items())[:5]
+                log(f"[Debug] {ex} sample last prices: {sample}")
 
             candidates_last = find_candidates_by_last_price(
                 last_prices,
