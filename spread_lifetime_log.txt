@@ -1,0 +1,30 @@
+GTC KuCoin->Binance: 0.00 ρεκ
+CFX MEXC->OKX: 0.00 ρεκ
+XLM OKX->Binance: 0.00 ρεκ
+XLM OKX->MEXC: 0.00 ρεκ
+XLM OKX->KuCoin: 0.00 ρεκ
+NEAR MEXC->Binance: 0.00 ρεκ
+NEAR MEXC->OKX: 0.00 ρεκ
+NEAR MEXC->KuCoin: 0.00 ρεκ
+MAGIC OKX->KuCoin: 0.00 ρεκ
+NEAR MEXC->KuCoin: 0.00 ρεκ
+NEAR MEXC->Binance: 0.00 ρεκ
+NEAR MEXC->OKX: 0.00 ρεκ
+NEAR Binance->OKX: 0.00 ρεκ
+NEAR MEXC->Binance: 0.00 ρεκ
+NEAR MEXC->OKX: 0.00 ρεκ
+NEAR MEXC->KuCoin: 0.00 ρεκ
+HBAR MEXC->KuCoin: 0.00 ρεκ
+ONE OKX->Binance: 1.65 ΡΠµΠΊ (max spread: 0.12%)
+ONE OKX->MEXC: 1.65 ΡΠµΠΊ (max spread: 0.12%)
+MAGIC OKX->KuCoin: 7.45 ΡΠµΠΊ (max spread: 0.16%)
+MAGIC Binance->KuCoin: 5.79 ΡΠµΠΊ (max spread: 0.12%)
+ONE KuCoin->MEXC: 1.53 ΡΠµΠΊ (max spread: 0.11%)
+MAGIC MEXC->KuCoin: 1.52 ΡΠµΠΊ (max spread: 0.11%)
+MAGIC Binance->KuCoin: 5.76 ΡΠµΠΊ (max spread: 0.12%)
+MAGIC OKX->KuCoin: 5.76 ΡΠµΠΊ (max spread: 0.13%)
+MAGIC MEXC->KuCoin: 11.61 ΡΠµΠΊ (max spread: 0.11%)
+MAGIC Binance->KuCoin: 5.37 ΡΠµΠΊ (max spread: 0.12%)
+MAGIC OKX->KuCoin: 6.98 ΡΠµΠΊ (max spread: 0.10%)
+COTI KuCoin->Binance: 2.09 ΡΠµΠΊ (max spread: 0.12%)
+COTI KuCoin->MEXC: 2.09 ΡΠµΠΊ (max spread: 0.12%)
