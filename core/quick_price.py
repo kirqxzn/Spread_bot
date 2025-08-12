@@ -135,7 +135,7 @@ def find_candidates_by_last_price(last_prices, spot_pairs, futures_pairs, exchan
         for ex in exchanges:
             if pair in last_prices.get(ex, {}) and pair in spot_pairs.get(ex, set()):
                 buy_exchanges.append(ex)
-            if pair in last_prices.get(ex, {}) and pair in futures_pairs.get(ex, set()):
+            if pair in last_prices.get(ex, {}) and pair in spot_pairs.get(ex, set()):
                 sell_exchanges.append(ex)
 
         if not buy_exchanges or not sell_exchanges:
