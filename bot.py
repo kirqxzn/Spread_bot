@@ -7,7 +7,7 @@ from utils.helpers import is_stablecoin_pair
 
 from api.spot_api import SpotAPI
 from api.futures_api import FuturesAPI
-from core.quick_price import fetch_last_prices, fetch_quick_prices, find_candidates_by_last_price, find_candidates_by_quick_prices
+from core.quick_price import fetch_last_prices, fetch_quick_prices, find_candidates_by_last_price, find_candidates_by_quick_prices_all
 from core.analyzer import analyze_arbitrage_opportunities
 from core.printer import print_candidates_by_last_price, print_candidates_table, print_arbitrage_opportunities
 
@@ -85,9 +85,8 @@ class ArbitrageBot:
             quick_prices = await fetch_quick_prices(self.exchanges)
             log(f"[Info] Quick prices fetched")
 
-            candidates_quick = find_candidates_by_quick_prices(
+            candidates_quick = find_candidates_by_quick_prices_all(
                 quick_prices,
-                candidates_last,
                 self.min_spread_percent,
                 self.max_spread_percent
             )

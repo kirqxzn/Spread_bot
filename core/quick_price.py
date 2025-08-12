@@ -167,14 +167,19 @@ def find_candidates_by_last_price(last_prices, spot_pairs, futures_pairs, exchan
     return candidates
 
 
-def find_candidates_by_quick_prices(quick_prices, candidate_pairs, min_spread_percent, max_spread_percent):
+def find_candidates_by_quick_prices_all(quick_prices, min_spread_percent, max_spread_percent):
     filtered_candidates = {}
-    for pair, exchanges in candidate_pairs.items():
-        for buy_ex in exchanges['buy']:
-            for sell_ex in exchanges['sell']:
-                if buy_ex == sell_ex:
-                    continue
-                if pair not in quick_prices.get(buy_ex, {}) or pair not in quick_prices.get(sell_ex, {}):
+    # перебираємо всі унікальні пари між усіма біржами
+    exchanges = list(quick_prices.keys())
+    for i in range(len(exchanges)):
+        for j in range(len(exchanges)):
+            if i == j:
+                continue
+            buy_ex = exchanges[i]
+            sell_ex = exchanges[j]
+
+            for pair in quick_prices[buy_ex].keys():
+                if pair not in quick_prices[sell_ex]:
                     continue
 
                 buy_ask = quick_prices[buy_ex][pair]['ask']
@@ -193,6 +198,6 @@ def find_candidates_by_quick_prices(quick_prices, candidate_pairs, min_spread_pe
                         filtered_candidates[pair]['buy'].append(buy_ex)
                     if sell_ex not in filtered_candidates[pair]['sell']:
                         filtered_candidates[pair]['sell'].append(sell_ex)
-
-    log(f"[Info] Total candidates found by quick prices: {len(filtered_candidates)}")
+    log(f"[Info] Total candidates found by quick prices (all pairs): {len(filtered_candidates)}")
     return filtered_candidates
+
