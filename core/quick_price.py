@@ -17,7 +17,6 @@ async def fetch_quick_prices(exchanges):
     results = {ex: {} for ex in exchanges}
 
     async with aiohttp.ClientSession() as session:
-
         if 'BINANCE' in exchanges:
             try:
                 url = 'https://api.binance.com/api/v3/ticker/bookTicker'
@@ -76,8 +75,6 @@ async def fetch_last_prices(exchanges):
             try:
                 url = 'https://api.binance.com/api/v3/ticker/price'
                 async with session.get(url) as resp:
-                    text = await resp.text()
-                    log(f"[Debug] Binance last prices raw response: {text[:500]}")
                     data = await resp.json()
                     for item in data:
                         sym = normalize_symbol('BINANCE', item['symbol'])
@@ -91,8 +88,6 @@ async def fetch_last_prices(exchanges):
             try:
                 url = 'https://api.kucoin.com/api/v1/market/allTickers'
                 async with session.get(url) as resp:
-                    text = await resp.text()
-                    log(f"[Debug] KuCoin last prices raw response: {text[:500]}")
                     data = await resp.json()
                     count = 0
                     for t in data['data']['ticker']:
@@ -109,8 +104,6 @@ async def fetch_last_prices(exchanges):
             try:
                 url = 'https://api.mexc.com/api/v3/ticker/price'
                 async with session.get(url) as resp:
-                    text = await resp.text()
-                    log(f"[Debug] MEXC last prices raw response: {text[:500]}")
                     data = await resp.json()
                     for item in data:
                         sym = normalize_symbol('MEXC', item['symbol'])
@@ -123,20 +116,17 @@ async def fetch_last_prices(exchanges):
     return results
 
 
-
-
-
 def find_candidates_by_last_price(last_prices, spot_pairs, futures_pairs, exchanges, min_spread_percent, max_spread_percent):
     candidates = {}
     all_pairs = set()
     for ex_prices in last_prices.values():
         all_pairs.update(ex_prices.keys())
 
-    log(f"[Debug] Total unique pairs in last_prices: {len(all_pairs)}")
+    # Тільки інформативний лог, можна закоментувати або прибрати, якщо хочеш
+    log(f"[Info] Total unique pairs in last_prices: {len(all_pairs)}")
 
     for pair in all_pairs:
         if not is_stablecoin_pair(pair):
-            log(f"[Debug] Skipping {pair}: not a stablecoin pair")
             continue
 
         buy_exchanges = []
@@ -149,7 +139,6 @@ def find_candidates_by_last_price(last_prices, spot_pairs, futures_pairs, exchan
                 sell_exchanges.append(ex)
 
         if not buy_exchanges or not sell_exchanges:
-            log(f"[Debug] Skipping {pair}: buy_exchanges={buy_exchanges}, sell_exchanges={sell_exchanges}")
             continue
 
         for buy_ex in buy_exchanges:
@@ -161,10 +150,8 @@ def find_candidates_by_last_price(last_prices, spot_pairs, futures_pairs, exchan
                 sell_price = last_prices[sell_ex][pair]
 
                 if buy_price <= 0 or sell_price <= 0:
-                    log(f"[Debug] Skipping {pair} between {buy_ex}->{sell_ex}: non-positive prices buy={buy_price}, sell={sell_price}")
                     continue
                 if buy_price >= sell_price:
-                    log(f"[Debug] Skipping {pair} between {buy_ex}->{sell_ex}: buy_price >= sell_price ({buy_price} >= {sell_price})")
                     continue
 
                 spread = (sell_price - buy_price) / buy_price * 100
@@ -175,17 +162,12 @@ def find_candidates_by_last_price(last_prices, spot_pairs, futures_pairs, exchan
                         candidates[pair]['buy'].append(buy_ex)
                     if sell_ex not in candidates[pair]['sell']:
                         candidates[pair]['sell'].append(sell_ex)
-                    log(f"[Debug] Candidate found: {pair} Buy on {buy_ex} at {buy_price}, Sell on {sell_ex} at {sell_price}, Spread {spread:.4f}%")
 
-    log(f"[Debug] Total candidates found by last price: {len(candidates)}")
+    log(f"[Info] Total candidates found by last price: {len(candidates)}")
     return candidates
 
 
 def find_candidates_by_quick_prices(quick_prices, candidate_pairs, min_spread_percent, max_spread_percent):
-    """
-    Фільтруємо кандидати з last_price по bid/ask spread.
-    Повертаємо словник з тими, хто пройшов по bid/ask.
-    """
     filtered_candidates = {}
     for pair, exchanges in candidate_pairs.items():
         for buy_ex in exchanges['buy']:
@@ -193,17 +175,14 @@ def find_candidates_by_quick_prices(quick_prices, candidate_pairs, min_spread_pe
                 if buy_ex == sell_ex:
                     continue
                 if pair not in quick_prices.get(buy_ex, {}) or pair not in quick_prices.get(sell_ex, {}):
-                    log(f"[Debug] Skipping {pair}: missing quick price data on {buy_ex} or {sell_ex}")
                     continue
 
                 buy_ask = quick_prices[buy_ex][pair]['ask']
                 sell_bid = quick_prices[sell_ex][pair]['bid']
 
                 if buy_ask <= 0 or sell_bid <= 0:
-                    log(f"[Debug] Skipping {pair} between {buy_ex}->{sell_ex}: non-positive bid/ask buy_ask={buy_ask}, sell_bid={sell_bid}")
                     continue
                 if buy_ask >= sell_bid:
-                    log(f"[Debug] Skipping {pair} between {buy_ex}->{sell_ex}: buy_ask >= sell_bid ({buy_ask} >= {sell_bid})")
                     continue
 
                 spread = (sell_bid - buy_ask) / buy_ask * 100
@@ -214,7 +193,6 @@ def find_candidates_by_quick_prices(quick_prices, candidate_pairs, min_spread_pe
                         filtered_candidates[pair]['buy'].append(buy_ex)
                     if sell_ex not in filtered_candidates[pair]['sell']:
                         filtered_candidates[pair]['sell'].append(sell_ex)
-                    log(f"[Debug] Candidate passed quick price filter: {pair} Buy on {buy_ex}, Sell on {sell_ex}, Spread {spread:.4f}%")
 
-    log(f"[Debug] Total candidates found by quick prices: {len(filtered_candidates)}")
+    log(f"[Info] Total candidates found by quick prices: {len(filtered_candidates)}")
     return filtered_candidates

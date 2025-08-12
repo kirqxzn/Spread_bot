@@ -60,8 +60,10 @@ class ArbitrageBot:
                 log(f"[Debug] {ex} futures pairs sample: {list(pairs)[:5]}")
 
             # Fetch last prices & find candidates by last price
+            log(">>> About to call fetch_last_prices")
             last_prices = await fetch_last_prices(self.exchanges)
-            log(f"[Info] Last prices fetched")
+            log(">>> fetch_last_prices returned")
+
             for ex, prices in last_prices.items():
                 log(f"[Debug] {ex} last_prices count: {len(prices)}")
                 sample = list(prices.items())[:5]
